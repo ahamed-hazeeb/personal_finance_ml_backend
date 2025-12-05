@@ -117,7 +117,11 @@ class SavingsForecaster(BaseFinancePredictor):
             # Predict monthly savings
             result = self.predict(X_pred, return_confidence_interval=True, confidence_level=confidence_level)
             monthly_savings_pred = result['predictions'][0]
-            ci_lower, ci_upper = result['confidence_interval'][0][0], result['confidence_interval'][1][0]
+            
+            # Extract confidence intervals: result['confidence_interval'] is (lower_array, upper_array)
+            ci_lower_array, ci_upper_array = result['confidence_interval']
+            ci_lower = ci_lower_array[0]  # First element of lower bound array
+            ci_upper = ci_upper_array[0]  # First element of upper bound array
             
             # Project cumulative savings
             projected_cumulative = current_savings + (monthly_savings_pred * period)

@@ -184,6 +184,28 @@ class CategorySpendingPredictor(BaseFinancePredictor):
         
         return risk_report
     
+    def get_feature_importance(self) -> pd.DataFrame:
+        """
+        Get average feature importance across all category predictors.
+        
+        Returns:
+            DataFrame with feature names and average importance scores
+        """
+        if not self.is_fitted:
+            raise ValueError("Model must be trained before getting feature importance")
+        
+        # For MultiOutputRegressor, average importance across all estimators
+        if hasattr(self.model, 'estimators_'):
+            avg_importance = np.mean([est.feature_importances_ for est in self.model.estimators_], axis=0)
+            importance_df = pd.DataFrame({
+                'feature': self.feature_names,
+                'importance': avg_importance
+            }).sort_values('importance', ascending=False)
+            return importance_df
+        else:
+            # Fallback to parent class implementation
+            return super().get_feature_importance()
+    
     def generate_budget_recommendations(
         self,
         monthly_df: pd.DataFrame,

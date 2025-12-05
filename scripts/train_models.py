@@ -190,16 +190,10 @@ def train_category_predictor(
     )
     print(category_metrics.to_string(index=False))
     
-    # Feature importance (for first output)
+    # Feature importance
     print("\nTop 10 Important Features (overall):")
-    # For MultiOutputRegressor, we can get importance from individual estimators
-    if hasattr(model.model, 'estimators_'):
-        avg_importance = np.mean([est.feature_importances_ for est in model.model.estimators_], axis=0)
-        importance_df = pd.DataFrame({
-            'feature': model.feature_names,
-            'importance': avg_importance
-        }).sort_values('importance', ascending=False)
-        print(importance_df.head(10).to_string(index=False))
+    importance_df = model.get_feature_importance()
+    print(importance_df.head(10).to_string(index=False))
     
     # Save model
     if model_save_path:

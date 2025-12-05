@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple, Optional
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from scipy import stats
 
 
 def calculate_regression_metrics(
@@ -73,7 +74,6 @@ def calculate_confidence_intervals(
     std_error = np.std(residuals)
     
     # Z-score for confidence level
-    from scipy import stats
     z_score = stats.norm.ppf((1 + confidence_level) / 2)
     
     # Calculate intervals

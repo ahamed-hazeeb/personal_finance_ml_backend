@@ -11,6 +11,10 @@ from typing import List, Tuple, Optional, Dict
 from datetime import datetime
 
 
+# Constants
+EPSILON = 1e-8  # Small value to avoid division by zero in normalization
+
+
 def create_time_features(df: pd.DataFrame, date_column: str = 'year_month') -> pd.DataFrame:
     """
     Create time-based features from date column.
@@ -249,10 +253,10 @@ def normalize_features(
         'std': X_train.std()
     }
     
-    X_train_norm = (X_train - normalization_params['mean']) / (normalization_params['std'] + 1e-8)
+    X_train_norm = (X_train - normalization_params['mean']) / (normalization_params['std'] + EPSILON)
     
     X_test_norm = None
     if X_test is not None:
-        X_test_norm = (X_test - normalization_params['mean']) / (normalization_params['std'] + 1e-8)
+        X_test_norm = (X_test - normalization_params['mean']) / (normalization_params['std'] + EPSILON)
     
     return X_train_norm, X_test_norm, normalization_params

@@ -252,7 +252,9 @@ class BaseFinancePredictor:
             raise ValueError("Model must be trained before saving")
         
         # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        dir_path = os.path.dirname(filepath)
+        if dir_path:  # Only create if there's a directory component
+            os.makedirs(dir_path, exist_ok=True)
         
         model_data = {
             'model': self.model,
