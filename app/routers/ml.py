@@ -56,7 +56,7 @@ def train_model(request: TrainRequest, db: Session = Depends(get_db)):
             end_date = datetime.strptime(request.end_date, "%Y-%m-%d")
         
         # Build monthly savings series from database
-        series = build_monthly_savings_series(
+        series, start_month = build_monthly_savings_series(
             db=db,
             user_id=request.user_id,
             start_date=start_date,
@@ -64,7 +64,7 @@ def train_model(request: TrainRequest, db: Session = Depends(get_db)):
         )
         
         # Train linear regression model
-        model_data = train_linear_model(series)
+        model_data = train_linear_model(series, start_month)
         
         # Save model parameters to database (upsert)
         model_params = save_model_parameters(

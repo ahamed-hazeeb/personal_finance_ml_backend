@@ -2,7 +2,7 @@
 ML Trainer module for building monthly savings series and training linear regression models.
 """
 from datetime import datetime, timedelta
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 import pandas as pd
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ def build_monthly_savings_series(
     user_id: int,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None
-) -> pd.Series:
+) -> Tuple[pd.Series, str]:
     """
     Build a monthly savings time series from transactions table.
     
@@ -28,7 +28,9 @@ def build_monthly_savings_series(
         end_date: Optional end date for filtering (defaults to today)
     
     Returns:
-        pandas.Series with monthly index (0..N-1) as index and total savings as values
+        Tuple of (pandas.Series, start_month):
+            - Series with monthly index (0..N-1) as index and total savings as values
+            - Start month as string in 'YYYY-MM' format
     
     Raises:
         ValueError: If insufficient data (less than 3 months)
@@ -37,7 +39,8 @@ def build_monthly_savings_series(
     if end_date is None:
         end_date = datetime.now()
     if start_date is None:
-        start_date = end_date - timedelta(days=365)  # Last 12 months
+        # Default to approximately 12 months ago (accounting for leap years)
+        start_date = end_date - timedelta(days=365)
     
     # Query to aggregate monthly savings
     # Use date_trunc to group by month
@@ -90,18 +93,16 @@ def build_monthly_savings_series(
         name='total_savings'
     )
     
-    # Store start_month as attribute for later use
-    series.start_month = start_month
-    
-    return series
+    return series, start_month
 
 
-def train_linear_model(series: pd.Series) -> Dict:
+def train_linear_model(series: pd.Series, start_month: str) -> Dict:
     """
     Train a linear regression model on monthly savings time series.
     
     Args:
         series: pandas Series with month index (0..N-1) and savings values
+        start_month: First month in the series (YYYY-MM format)
     
     Returns:
         Dictionary containing:
@@ -129,7 +130,7 @@ def train_linear_model(series: pd.Series) -> Dict:
         'intercept': float(model.intercept_),
         'r2_score': float(r2),
         'trained_months': len(series),
-        'start_month': getattr(series, 'start_month', 'unknown')
+        'start_month': start_month
     }
     
     return result

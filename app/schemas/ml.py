@@ -25,7 +25,7 @@ class ModelParametersResponse(BaseModel):
     last_trained_date: date
     
     class Config:
-        from_attributes = True  # Pydantic v2 compatible
+        from_attributes = True  # Pydantic v2 syntax
 
 
 class TrainResponse(BaseModel):
