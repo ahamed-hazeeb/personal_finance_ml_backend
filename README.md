@@ -1,506 +1,573 @@
-# Personal Finance ML Backend
+# Personal Finance ML Backend v2.0
 
-AI-powered predictive analytics backend for personal finance management. This system provides modular, extensible machine learning models for expense forecasting, category-wise spending prediction, and savings trajectory analysis.
+🚀 **Production-Ready AI-Powered Personal Finance Management System**
 
-## Features
+A comprehensive machine learning backend for personal finance management with advanced predictive analytics, goal planning intelligence, and real-time financial insights.
 
-### 🎯 Core Predictive Analytics
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.68+-green.svg)](https://fastapi.tiangolo.com)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-1. **Monthly Expense Forecasting**
-   - Predicts next month's total expense based on 3-12 months of historical data
-   - Provides 95% confidence intervals for predictions
-   - Uses time-series features and rolling statistics
+---
 
-2. **Category-wise Spending Prediction**
-   - Forecasts upcoming expenses for each spending category (Food, Transport, Shopping, etc.)
-   - Detects categories at risk of overspending (>20% above historical average)
-   - Generates optimal budget recommendations based on income and spending patterns
-   - Uses MultiOutputRegressor for cross-category pattern learning
+## 🌟 Key Features
 
-3. **Savings Trajectory Forecasting**
-   - Projects user's cumulative savings over 3, 6, and 12 months
-   - Provides confidence intervals on growth trends
-   - Calculates financial health metrics and savings rate
-   - Offers personalized recommendations for improving savings
+### 💰 Goal Planning Intelligence
+- **Timeline Calculator**: Calculate how long it takes to reach financial goals
+- **Reverse Planning**: Determine required monthly savings for target dates
+- **Milestone Tracking**: Automatic milestone generation (25%, 50%, 75%, 100%)
+- **Feasibility Analysis**: AI-powered assessment of goal achievability
+- **Alternative Scenarios**: Multiple saving strategy recommendations
 
-### 🔧 Technical Features
+### 📊 ML-Powered Predictions
+- **Savings Forecasting**: Linear regression models with confidence intervals
+- **Monthly Expense Prediction**: Time-series forecasting with 3-24 month history
+- **Category-wise Analysis**: Multi-output prediction for spending categories
+- **Trend Detection**: Identify spending patterns and anomalies
 
-- **Modular Architecture**: Extensible design for future AI features (investment readiness, debt management, etc.)
-- **Robust Feature Engineering**: Time-series features, lag features, rolling statistics, and growth indicators
-- **Model Persistence**: Save and load trained models for production use
-- **Time-Series Cross-Validation**: Proper evaluation respecting temporal ordering
-- **Sample Data Generation**: Realistic dummy data for rapid development and testing
-- **Comprehensive Evaluation**: MAE, RMSE, MAPE, R² metrics with cross-validation
+### 🏗️ Production-Ready Infrastructure
+- **Structured Logging**: JSON-formatted logs with contextual information
+- **Prometheus Metrics**: Built-in monitoring and performance tracking
+- **Redis Caching**: High-performance caching layer for predictions
+- **Rate Limiting**: Configurable API rate limiting per user/IP
+- **Error Handling**: Comprehensive error handling with user-friendly messages
+- **Authentication**: API key-based authentication middleware
 
-## Installation
+### 🐳 Deployment Ready
+- **Docker Support**: Multi-stage Dockerfile for optimized builds
+- **Docker Compose**: Complete stack with PostgreSQL, Redis, and ML service
+- **Health Checks**: Automated health monitoring for all services
+- **Horizontal Scaling**: Load balancer ready architecture
+- **Environment Configs**: Separate configs for dev/staging/production
 
-### Prerequisites
-- Python 3.7+
-- pip
+---
 
-### Setup
+## 📦 Quick Start
+
+### Option 1: Docker Compose (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/ahamed-hazeeb/personal_finance_ml_backend.git
 cd personal_finance_ml_backend
 
+# Create environment configuration
+cp .env.example .env
+
+# Start all services (PostgreSQL, Redis, ML Backend)
+docker-compose up -d
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f ml_backend
+```
+
+**Services Available:**
+- 🌐 API: http://localhost:8000
+- 📚 Interactive Docs: http://localhost:8000/docs
+- 🏥 Health Check: http://localhost:8000/health
+- 📊 Metrics: http://localhost:8000/metrics
+- 🗄️ PostgreSQL: localhost:5432
+- 💾 Redis: localhost:6379
+
+### Option 2: Local Development
+
+```bash
+# Clone repository
+git clone https://github.com/ahamed-hazeeb/personal_finance_ml_backend.git
+cd personal_finance_ml_backend
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up database connection (required for FastAPI endpoints)
-export DATABASE_URL="postgresql://user:password@localhost/personal_finance"
-```
+# Set up environment
+cp .env.example .env
+# Edit .env with your database and Redis URLs
 
-## FastAPI ML Endpoints (NEW)
-
-The backend now includes FastAPI endpoints for training and predicting monthly savings using linear regression models with PostgreSQL storage.
-
-### Starting the API Server
-
-```bash
-# Start the FastAPI server
+# Start the server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The API will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
+---
 
-### Database Schema
+## 🚀 API Endpoints
 
-The API expects the following PostgreSQL tables:
+### Goal Planning
 
-**transactions table:**
-- `id`: INTEGER PRIMARY KEY
-- `user_id`: INTEGER (indexed)
-- `date`: DATE
-- `amount`: NUMERIC
-- `type`: VARCHAR (values: 'expense', 'income', 'savings')
-- `category`: VARCHAR (optional)
-- `description`: VARCHAR (optional)
+#### Calculate Goal Timeline
+Calculate how long it will take to reach a financial goal.
 
-**model_parameters table:**
-- `id`: INTEGER PRIMARY KEY
-- `user_id`: INTEGER (indexed)
-- `model_type`: VARCHAR (e.g., 'linear_regression')
-- `target_table`: VARCHAR (e.g., 'transactions_savings')
-- `slope`: NUMERIC
-- `intercept`: NUMERIC
-- `parameters`: JSONB (stores r2_score, trained_months, start_month)
-- `last_trained_date`: DATE
-
-### Endpoint Usage
-
-#### 1. Train a Linear Regression Model
-
-**POST /ml/train**
-
-Train a linear regression model for monthly savings prediction from transaction history.
-
-**Request:**
-```json
-{
-  "user_id": 123,
-  "start_date": "2023-01-01",  // Optional, defaults to last 12 months
-  "end_date": "2023-12-31"      // Optional, defaults to today
-}
+```bash
+curl -X POST "http://localhost:8000/api/v1/goals/calculate-timeline" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target_amount": 50000,
+    "current_savings": 10000,
+    "monthly_savings": 2000
+  }'
 ```
 
 **Response:**
 ```json
 {
-  "message": "Model trained successfully with 12 months of data",
-  "model": {
-    "id": 1,
-    "user_id": 123,
-    "model_type": "linear_regression",
-    "target_table": "transactions_savings",
-    "slope": 150.25,
-    "intercept": 1000.0,
-    "parameters": {
-      "r2_score": 0.85,
-      "trained_months": 12,
-      "start_month": "2023-01"
-    },
-    "last_trained_date": "2024-01-15"
-  }
+  "feasible": true,
+  "months_needed": 20,
+  "target_date": "2027-08-06",
+  "feasibility_rating": "Good",
+  "milestones": [
+    {"percentage": 25, "amount": 20000, "expected_date": "2025-05-06"},
+    {"percentage": 50, "amount": 30000, "expected_date": "2025-10-06"},
+    {"percentage": 75, "amount": 40000, "expected_date": "2026-03-06"},
+    {"percentage": 100, "amount": 50000, "expected_date": "2026-08-06"}
+  ]
 }
 ```
 
-**Behavior:**
-- Loads savings transactions (type='savings') for the user within the date range
-- Aggregates monthly totals and creates a time series
-- Trains a scikit-learn LinearRegression model
-- Computes R² score and stores model parameters
-- Upserts into model_parameters table (updates if exists, inserts otherwise)
-- Requires at least 3 months of data (returns 400 error otherwise)
+#### Reverse Goal Planning
+Calculate required monthly savings to reach a goal by a specific date.
 
-**Example with curl:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/goals/reverse-plan" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target_amount": 50000,
+    "current_savings": 10000,
+    "target_date": "2026-12-31"
+  }'
+```
+
+**Response:**
+```json
+{
+  "feasible": true,
+  "required_monthly_savings": 1666.67,
+  "feasibility_score": 70,
+  "alternatives": [
+    {
+      "scenario": "Aggressive",
+      "monthly_savings": 2500,
+      "months_needed": 16,
+      "description": "Reach your goal faster with increased savings"
+    },
+    {
+      "scenario": "Conservative",
+      "monthly_savings": 1250,
+      "months_needed": 32,
+      "description": "More flexible timeline with lower monthly commitment"
+    }
+  ]
+}
+```
+
+### ML Training & Prediction
+
+#### Train Savings Model
 ```bash
 curl -X POST "http://localhost:8000/ml/train" \
   -H "Content-Type: application/json" \
-  -d '{"user_id": 123, "start_date": "2023-01-01", "end_date": "2023-12-31"}'
+  -d '{
+    "user_id": 123,
+    "start_date": "2023-01-01",
+    "end_date": "2024-12-01"
+  }'
 ```
 
-#### 2. Predict Monthly Savings
+#### Predict Monthly Savings
+```bash
+curl -X POST "http://localhost:8000/ml/predict" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 123,
+    "months_ahead": 6
+  }'
+```
 
-**POST /ml/predict**
+### System Endpoints
 
-Predict monthly savings for future months using a trained model.
+- **Health Check**: `GET /health`
+- **Prometheus Metrics**: `GET /metrics`
+- **API Info**: `GET /`
+- **Interactive Docs**: `GET /docs`
+- **OpenAPI Schema**: `GET /openapi.json`
 
-**Request:**
-```json
-{
-  "user_id": 123,
-  "months_ahead": 6
-}
+📖 **Full API Documentation**: See [API_EXAMPLES.md](API_EXAMPLES.md)
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐
+│  Load Balancer  │
+└────────┬────────┘
+         │
+    ┌────┴─────┐
+    │ FastAPI  │◄──────┐
+    │  ML API  │       │
+    └────┬─────┘       │
+         │             │
+    ┌────┴──────┐  ┌───┴────┐
+    │PostgreSQL │  │ Redis  │
+    │  Database │  │ Cache  │
+    └───────────┘  └────────┘
+```
+
+### Tech Stack
+
+- **Framework**: FastAPI (async Python web framework)
+- **Database**: PostgreSQL (with SQLAlchemy ORM)
+- **Cache**: Redis (for prediction caching)
+- **ML Libraries**: scikit-learn, statsmodels, numpy, pandas
+- **Monitoring**: Prometheus metrics
+- **Logging**: Structured JSON logs
+- **Authentication**: API key middleware
+- **Rate Limiting**: slowapi with Redis backend
+- **Deployment**: Docker & Docker Compose
+
+### Project Structure
+
+```
+personal_finance_ml_backend/
+├── app/
+│   ├── api/                    # API versioning
+│   ├── core/                   # Core configuration
+│   │   ├── config.py          # Settings & environment
+│   │   ├── logging.py         # Structured logging
+│   │   └── monitoring.py      # Prometheus metrics
+│   ├── middleware/            # Custom middleware
+│   │   ├── auth.py           # Authentication
+│   │   ├── error_handler.py  # Error handling
+│   │   └── rate_limiter.py   # Rate limiting
+│   ├── models/                # ML models
+│   │   └── goal_planner.py   # Goal planning engine
+│   ├── routers/               # API routes
+│   │   ├── goals.py          # Goal endpoints
+│   │   └── ml.py             # ML endpoints
+│   ├── schemas/               # Pydantic schemas
+│   ├── services/              # Business logic
+│   │   └── cache_service.py  # Caching service
+│   ├── utils/                 # Utilities
+│   │   └── validators.py     # Input validation
+│   ├── db.py                  # Database models
+│   └── main.py                # FastAPI application
+├── models/                    # Standalone ML models
+├── scripts/                   # Utility scripts
+├── .env.example              # Environment template
+├── docker-compose.yml        # Docker Compose config
+├── Dockerfile                # Docker build config
+├── requirements.txt          # Python dependencies
+├── API_EXAMPLES.md          # API usage examples
+├── DEPLOYMENT.md            # Deployment guide
+└── README.md                # This file
+```
+
+---
+
+## 🔧 Configuration
+
+All configuration is managed through environment variables. See [.env.example](.env.example) for all options.
+
+### Key Configuration Options
+
+```env
+# Database
+DATABASE_URL=postgresql://user:password@localhost/personal_finance
+
+# Redis Cache
+REDIS_HOST=localhost
+CACHE_ENABLED=true
+
+# Security
+SECRET_KEY=your-secret-key-here
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_REQUESTS=100
+
+# Features
+ENABLE_GOAL_PLANNING=true
+ENABLE_METRICS=true
+
+# Environment
+ENVIRONMENT=production  # development, staging, production
+DEBUG=false
+```
+
+---
+
+## 📊 Monitoring & Observability
+
+### Health Check
+
+```bash
+curl http://localhost:8000/health
 ```
 
 **Response:**
 ```json
 {
-  "user_id": 123,
-  "model_type": "linear_regression",
-  "predictions": [1801.0, 1951.25, 2101.5, 2251.75, 2402.0, 2552.25],
-  "model_parameters": {
-    "id": 1,
-    "user_id": 123,
-    "model_type": "linear_regression",
-    "target_table": "transactions_savings",
-    "slope": 150.25,
-    "intercept": 1000.0,
-    "parameters": {
-      "r2_score": 0.85,
-      "trained_months": 12,
-      "start_month": "2023-01"
-    },
-    "last_trained_date": "2024-01-15"
+  "status": "healthy",
+  "version": "2.0.0",
+  "environment": "production",
+  "cache": {
+    "enabled": true,
+    "hit_rate": 65.5
   }
 }
 ```
 
-**Behavior:**
-- Loads the latest trained model for the user
-- Returns 404 if no model is found
-- Generates predictions for the next N months using the linear model
-- Returns predictions as an array along with model metadata
+### Prometheus Metrics
 
-**Example with curl:**
-```bash
-curl -X POST "http://localhost:8000/ml/predict" \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": 123, "months_ahead": 6}'
+Access metrics at `http://localhost:8000/metrics`
+
+**Available Metrics:**
+- API request counts and latencies
+- Model training/prediction metrics
+- Cache hit/miss rates
+- Database query performance
+- Error rates by endpoint
+
+### Structured Logging
+
+All logs are emitted in JSON format for easy parsing:
+
+```json
+{
+  "timestamp": "2024-12-06T18:19:22.744822Z",
+  "level": "INFO",
+  "logger": "app.main",
+  "message": "Starting Personal Finance ML Backend v2.0.0",
+  "module": "main",
+  "function": "<module>",
+  "line": 50
+}
 ```
-
-### API Integration Notes
-
-- All endpoints use synchronous SQLAlchemy sessions
-- Training is performed in a database transaction
-- Model parameters are automatically upserted (no duplicates)
-- Clear error messages for missing data or models
-- Interactive API documentation available at `/docs`
-
-## Quick Start
-
-### 1. Generate Sample Data
-
-```bash
-cd data
-python sample_data_generator.py
-```
-
-This creates:
-- `sample_transactions.csv`: Individual transaction records
-- `sample_monthly_data.csv`: Aggregated monthly financial data
-
-### 2. Train Models
-
-Train all models (expense, category, savings):
-
-```bash
-python scripts/train_models.py --data ./data/sample_monthly_data.csv --models-dir ./models/saved
-```
-
-Train specific model:
-
-```bash
-# Train only expense forecaster
-python scripts/train_models.py --model-type expense
-
-# Train only category predictor
-python scripts/train_models.py --model-type category
-
-# Train only savings forecaster
-python scripts/train_models.py --model-type savings
-```
-
-### 3. Make Predictions
-
-```bash
-python scripts/predict.py --data ./data/sample_monthly_data.csv --models-dir ./models/saved
-```
-
-## Project Structure
-
-```
-personal_finance_ml_backend/
-├── data/
-│   ├── sample_data_generator.py    # Generate dummy transaction data
-│   ├── sample_transactions.csv     # Sample transaction records
-│   └── sample_monthly_data.csv     # Sample monthly aggregated data
-├── models/
-│   ├── __init__.py
-│   ├── base_predictor.py           # Base class for all predictors
-│   ├── expense_forecaster.py       # Monthly expense forecasting
-│   ├── category_predictor.py       # Category-wise spending prediction
-│   ├── savings_forecaster.py       # Savings trajectory forecasting
-│   └── saved/                      # Trained model files (.pkl)
-├── utils/
-│   ├── __init__.py
-│   ├── preprocessing.py            # Feature engineering and data prep
-│   └── metrics.py                  # Evaluation metrics and reporting
-├── scripts/
-│   ├── train_models.py             # Training pipeline
-│   └── predict.py                  # Prediction/inference script
-├── requirements.txt                # Python dependencies
-├── .gitignore
-└── README.md
-```
-
-## Usage Examples
-
-### Python API
-
-#### Expense Forecasting
-
-```python
-from models import ExpenseForecaster
-import pandas as pd
-
-# Load data
-monthly_df = pd.read_csv('data/sample_monthly_data.csv')
-
-# Initialize and train model
-model = ExpenseForecaster(n_estimators=100, max_depth=10)
-X, y = model.prepare_data(monthly_df, target_column='total_expense')
-model.train(X[:-3], y[:-3])  # Train on all but last 3 months
-
-# Make prediction for next month
-forecast = model.forecast_next_month(monthly_df, confidence_level=0.95)
-print(f"Predicted Expense: ${forecast['predicted_expense']:.2f}")
-print(f"95% CI: {forecast['confidence_interval']}")
-
-# Save model
-model.save('models/saved/expense_model.pkl')
-```
-
-#### Category-wise Prediction
-
-```python
-from models import CategorySpendingPredictor
-
-# Initialize and train
-model = CategorySpendingPredictor(n_estimators=100)
-X, y = model.prepare_data(monthly_df)
-model.train(X[:-3], y[:-3])
-
-# Predict next month's category expenses
-forecasts = model.forecast_categories(monthly_df)
-for category, info in forecasts.items():
-    print(f"{category}: ${info['predicted']:.2f}")
-
-# Detect overspending risks
-risks = model.detect_overspending_risks(monthly_df, threshold=1.2)
-at_risk = [cat for cat, info in risks.items() if info['at_risk']]
-print(f"At risk categories: {at_risk}")
-
-# Generate budget recommendations
-total_income = monthly_df['total_income'].iloc[-1]
-recommendations = model.generate_budget_recommendations(
-    monthly_df, 
-    total_budget=total_income,
-    safety_margin=0.1
-)
-print(recommendations)
-```
-
-#### Savings Forecasting
-
-```python
-from models import SavingsForecaster
-
-# Initialize and train
-model = SavingsForecaster(n_estimators=100)
-X, y = model.prepare_data(monthly_df, target_column='savings')
-model.train(X[:-3], y[:-3])
-
-# Forecast savings trajectory
-trajectory = model.forecast_trajectory(monthly_df, periods=[3, 6, 12])
-print(f"Current Savings: ${trajectory['current_savings']:.2f}")
-print(f"Projected (3 months): ${trajectory['3_months']['projected_savings']:.2f}")
-
-# Assess financial health
-assessment = model.assess_financial_health(monthly_df)
-print(f"Status: {assessment['status']}")
-print(f"Message: {assessment['message']}")
-print(f"Recommendations: {assessment['recommendations']}")
-```
-
-## Model Architecture
-
-### Base Predictor
-All models inherit from `BaseFinancePredictor`, which provides:
-- RandomForestRegressor with configurable parameters
-- Train/predict/evaluate methods
-- Confidence interval calculation
-- Model persistence (save/load)
-- Feature importance analysis
-- Time-series cross-validation
-
-### Feature Engineering
-The preprocessing pipeline creates:
-- **Time features**: Month, quarter, year, cyclical encoding (sin/cos)
-- **Lag features**: Previous 1, 2, 3 months' values
-- **Rolling features**: 3-month and 6-month rolling mean, std, trend
-- **Growth features**: Month-over-month and year-over-year growth rates
-
-### Model Types
-
-1. **ExpenseForecaster**: Single-output RandomForestRegressor
-   - Target: Total monthly expense
-   - Features: Time features, expense lags, income lags, rolling statistics
-
-2. **CategorySpendingPredictor**: MultiOutputRegressor
-   - Targets: Multiple category expenses simultaneously
-   - Features: Category-specific lags, rolling stats, time features
-   - Enables cross-category pattern learning
-
-3. **SavingsForecaster**: Single-output RandomForestRegressor
-   - Target: Monthly savings (income - expenses)
-   - Features: Savings lags, income/expense patterns, time features
-
-## API Integration Notes
-
-### RESTful API Structure (Future Implementation)
-
-```python
-# Suggested API endpoints for integration:
-
-POST /api/train
-- Train models with user's historical data
-- Input: Historical transaction data
-- Output: Model IDs, training metrics
-
-POST /api/predict/expense
-- Get monthly expense forecast
-- Input: User ID or historical data
-- Output: Prediction with confidence interval
-
-POST /api/predict/categories
-- Get category-wise predictions
-- Input: User ID or historical data
-- Output: Category forecasts, risk analysis, budget recommendations
-
-POST /api/predict/savings
-- Get savings trajectory
-- Input: User ID or historical data
-- Output: 3/6/12-month projections, financial health assessment
-
-GET /api/models/{model_id}
-- Get model information and performance metrics
-```
-
-### Integration with FastAPI (Example)
-
-```python
-from fastapi import FastAPI
-from models import ExpenseForecaster, CategorySpendingPredictor, SavingsForecaster
-
-app = FastAPI()
-
-@app.post("/api/predict/expense")
-async def predict_expense(user_data: dict):
-    model = ExpenseForecaster()
-    model.load('models/saved/expense_forecaster.pkl')
-    
-    monthly_df = pd.DataFrame(user_data['monthly_data'])
-    forecast = model.forecast_next_month(monthly_df)
-    
-    return {
-        "predicted_expense": forecast['predicted_expense'],
-        "confidence_interval": forecast['confidence_interval'],
-        "confidence_level": forecast['confidence_level']
-    }
-```
-
-## Extensibility
-
-The codebase is designed for easy extension to additional AI features:
-
-### Adding New Features
-
-1. **Investment Readiness Score**
-   - Create `InvestmentReadinessPredictor` inheriting from `BaseFinancePredictor`
-   - Use savings rate, income stability, and expense patterns as features
-   - Classify users into investment readiness categories
-
-2. **Debt Management Advisor**
-   - Create `DebtManagementAdvisor` model
-   - Predict optimal debt payoff strategies
-   - Recommend allocation between debt payment and savings
-
-3. **Anomaly Detection**
-   - Add `AnomalyDetector` for unusual spending patterns
-   - Use Isolation Forest or One-Class SVM
-   - Alert users to suspicious transactions
-
-### Custom Data Sources
-
-```python
-# Extend sample_data_generator.py for custom data
-def generate_custom_categories(categories: dict):
-    """Add custom spending categories"""
-    pass
-
-def load_from_bank_api(api_credentials: dict):
-    """Load real transaction data from bank API"""
-    pass
-```
-
-## Performance Metrics
-
-Models are evaluated using:
-- **MAE** (Mean Absolute Error): Average prediction error in dollars
-- **RMSE** (Root Mean Squared Error): Penalizes larger errors more
-- **MAPE** (Mean Absolute Percentage Error): Error as percentage
-- **R²** (R-squared): Proportion of variance explained (0-1, higher is better)
-
-Typical performance on sample data:
-- Expense Forecaster: MAPE ~5-10%
-- Category Predictor: MAPE ~10-15% (varies by category)
-- Savings Forecaster: MAPE ~8-12%
-
-## Contributing
-
-Contributions are welcome! Areas for improvement:
-- Deep learning models (LSTM, Transformer) for time-series
-- More sophisticated feature engineering
-- Hyperparameter optimization
-- Real-time model updates
-- Multi-user support and personalization
-- Integration with financial APIs (Plaid, Yodlee)
-
-## License
-
-MIT License - feel free to use in your projects
-
-## Support
-
-For questions or issues, please open an issue on GitHub.
 
 ---
 
-**Built with**: Python, scikit-learn, pandas, numpy
+## 🧪 Testing
 
-**Author**: Ahamed Hazeeb
+### Manual API Testing
 
-**Version**: 1.0.0
+```bash
+# Test goal timeline
+python -c "
+import requests
+response = requests.post(
+    'http://localhost:8000/api/v1/goals/calculate-timeline',
+    json={'target_amount': 50000, 'current_savings': 10000, 'monthly_savings': 2000}
+)
+print(response.json())
+"
+```
+
+### Integration Testing
+
+```bash
+# Run with pytest (when tests are implemented)
+pytest tests/ -v
+```
+
+---
+
+## 🚢 Deployment
+
+### Docker Deployment
+
+```bash
+# Build image
+docker build -t pfms-backend:latest .
+
+# Run container
+docker run -d \
+  -p 8000:8000 \
+  -e DATABASE_URL=postgresql://user:pass@host/db \
+  -e REDIS_HOST=redis \
+  pfms-backend:latest
+```
+
+### Production Deployment
+
+For production deployment with load balancing, SSL, and monitoring:
+
+📖 **Complete Guide**: See [DEPLOYMENT.md](DEPLOYMENT.md)
+
+Key topics covered:
+- AWS/GCP/Azure deployment
+- Nginx reverse proxy setup
+- SSL/TLS configuration
+- Database migrations
+- Backup strategies
+- Performance tuning
+- Security hardening
+
+---
+
+## 🔐 Security
+
+### Features
+
+- **API Key Authentication**: Protect endpoints with API keys
+- **Rate Limiting**: Prevent abuse with configurable rate limits
+- **Input Validation**: Comprehensive validation using Pydantic
+- **SQL Injection Protection**: SQLAlchemy ORM with parameterized queries
+- **CORS Configuration**: Configurable CORS policies
+- **Error Sanitization**: Hide sensitive info in production errors
+
+### Best Practices
+
+```python
+# Always use environment variables for secrets
+SECRET_KEY=your-secret-key-here  # Never commit this!
+
+# Enable rate limiting in production
+RATE_LIMIT_ENABLED=true
+
+# Use HTTPS in production
+# Configure via reverse proxy (Nginx/Caddy)
+
+# Restrict CORS origins
+CORS_ORIGINS=["https://yourapp.com"]
+```
+
+---
+
+## 🔄 Integration Examples
+
+### JavaScript/Node.js
+
+```javascript
+const axios = require('axios');
+
+const API_URL = 'http://localhost:8000';
+
+async function calculateGoal() {
+  const response = await axios.post(
+    `${API_URL}/api/v1/goals/calculate-timeline`,
+    {
+      target_amount: 50000,
+      current_savings: 10000,
+      monthly_savings: 2000
+    }
+  );
+  return response.data;
+}
+```
+
+### Python
+
+```python
+import requests
+
+response = requests.post(
+    'http://localhost:8000/api/v1/goals/calculate-timeline',
+    json={
+        'target_amount': 50000,
+        'current_savings': 10000,
+        'monthly_savings': 2000
+    }
+)
+result = response.json()
+```
+
+📖 **More Examples**: See [API_EXAMPLES.md](API_EXAMPLES.md)
+
+---
+
+## 🛠️ Development
+
+### Setup Development Environment
+
+```bash
+# Clone and setup
+git clone https://github.com/ahamed-hazeeb/personal_finance_ml_backend.git
+cd personal_finance_ml_backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Set environment to development
+export ENVIRONMENT=development
+export DEBUG=true
+
+# Run with auto-reload
+uvicorn app.main:app --reload
+```
+
+### Code Style
+
+- **PEP 8**: Follow Python style guidelines
+- **Type Hints**: Use type hints for all functions
+- **Docstrings**: Document all public methods
+- **Validation**: Validate all inputs using Pydantic
+
+---
+
+## 📈 Roadmap
+
+### ✅ Completed (v2.0)
+- Core infrastructure (logging, monitoring, caching)
+- Goal planning intelligence
+- Enhanced database schema
+- Docker deployment
+- Comprehensive documentation
+
+### 🚧 In Progress
+- Advanced expense forecasting (Holt-Winters, ARIMA)
+- Budget optimizer with 50/30/20 rule
+- Financial health score calculator
+- Recommendations engine
+
+### 🔮 Planned (v2.1+)
+- Cash flow predictor
+- Debt management optimizer
+- Investment readiness analyzer
+- Mobile app integration
+- Real-time notifications
+- Multi-currency support
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📧 Support
+
+- **Documentation**: [API Examples](API_EXAMPLES.md) | [Deployment Guide](DEPLOYMENT.md)
+- **Issues**: [GitHub Issues](https://github.com/ahamed-hazeeb/personal_finance_ml_backend/issues)
+- **Interactive API Docs**: http://localhost:8000/docs
+
+---
+
+## 🙏 Acknowledgments
+
+- FastAPI for the excellent web framework
+- scikit-learn for ML capabilities
+- The open-source community
+
+---
+
+**Built with ❤️ by Ahamed Hazeeb**
+
+**Version**: 2.0.0  
+**Last Updated**: December 2024
