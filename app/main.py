@@ -14,9 +14,11 @@ app = FastAPI(
 )
 
 # Configure CORS
+# WARNING: In production, update allow_origins to restrict access to specific domains
+# Current setting (*) allows all origins and should be changed for production deployment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update this in production
+    allow_origins=["*"],  # TODO: Update this in production to specific domains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

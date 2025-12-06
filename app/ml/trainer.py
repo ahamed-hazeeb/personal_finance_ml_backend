@@ -2,13 +2,12 @@
 ML Trainer module for building monthly savings series and training linear regression models.
 """
 from datetime import datetime, timedelta
-from typing import Optional, Tuple, Dict
+from typing import Optional, Dict
 import pandas as pd
-from sqlalchemy import func, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
-import numpy as np
 
 from app.db import Transaction, ModelParameters
 

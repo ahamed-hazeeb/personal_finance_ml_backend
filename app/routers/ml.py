@@ -74,7 +74,7 @@ def train_model(request: TrainRequest, db: Session = Depends(get_db)):
         )
         
         # Convert to response schema
-        model_response = ModelParametersResponse.from_orm(model_params)
+        model_response = ModelParametersResponse.model_validate(model_params)
         
         return TrainResponse(
             message=f"Model trained successfully with {model_data['trained_months']} months of data",
@@ -130,7 +130,7 @@ def predict_model(request: PredictRequest, db: Session = Depends(get_db)):
         )
         
         # Convert to response schema
-        model_response = ModelParametersResponse.from_orm(model)
+        model_response = ModelParametersResponse.model_validate(model)
         
         return PredictResponse(
             user_id=request.user_id,
