@@ -9,6 +9,11 @@ faker>=8.0.0
 # Model Persistence
 joblib>=1.0.0
 
-# Optional: for future API integration
-# fastapi>=0.68.0
-# uvicorn>=0.15.0
+# FastAPI and Web Framework
+fastapi>=0.68.0
+uvicorn>=0.15.0
+pydantic>=1.8.0
+
+# Database
+sqlalchemy>=1.4.0
+psycopg2-binary>=2.9.0
