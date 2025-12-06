@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pfms_postgres
+    environment:
+      POSTGRES_USER: pfms_user
+      POSTGRES_PASSWORD: pfms_password
+      POSTGRES_DB: personal_finance
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pfms_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pfms_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: pfms_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pfms_network
+
+  # ML Backend Service
+  ml_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pfms_ml_backend
+    environment:
+      - DATABASE_URL=postgresql://pfms_user:pfms_password@postgres:5432/personal_finance
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - CACHE_ENABLED=true
+      - RATE_LIMIT_ENABLED=true
+      - ENABLE_METRICS=true
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./models/saved:/app/models/saved
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - pfms_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  pfms_network:
+    driver: bridge
