@@ -1,7 +1,7 @@
 """
 Pydantic schemas for ML training and prediction endpoints.
 """
-from datetime import date
+from datetime import date as date_type
 from typing import Optional, List, Dict
 from pydantic import BaseModel, Field
 
@@ -9,8 +9,8 @@ from pydantic import BaseModel, Field
 class TrainRequest(BaseModel):
     """Request schema for training endpoint."""
     user_id: int = Field(..., description="User ID to train model for")
-    start_date: Optional[str] = Field(None, description="Start date for training data (YYYY-MM-DD format)")
-    end_date: Optional[str] = Field(None, description="End date for training data (YYYY-MM-DD format)")
+    start_date: Optional[date_type] = Field(None, description="Start date for training data")
+    end_date: Optional[date_type] = Field(None, description="End date for training data")
 
 
 class ModelParametersResponse(BaseModel):
@@ -22,7 +22,7 @@ class ModelParametersResponse(BaseModel):
     slope: float
     intercept: float
     parameters: Dict
-    last_trained_date: date
+    last_trained_date: date_type
     
     class Config:
         from_attributes = True  # Pydantic v2 syntax

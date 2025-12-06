@@ -47,13 +47,14 @@ def train_model(request: TrainRequest, db: Session = Depends(get_db)):
         HTTPException 500: If training fails
     """
     try:
-        # Parse dates if provided
+        # Convert date objects to datetime objects if provided
+        # Pydantic automatically validates date format
         start_date = None
         end_date = None
         if request.start_date:
-            start_date = datetime.strptime(request.start_date, "%Y-%m-%d")
+            start_date = datetime.combine(request.start_date, datetime.min.time())
         if request.end_date:
-            end_date = datetime.strptime(request.end_date, "%Y-%m-%d")
+            end_date = datetime.combine(request.end_date, datetime.min.time())
         
         # Build monthly savings series from database
         series, start_month = build_monthly_savings_series(
