@@ -47,7 +47,157 @@ cd personal_finance_ml_backend
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Set up database connection (required for FastAPI endpoints)
+export DATABASE_URL="postgresql://user:password@localhost/personal_finance"
 ```
+
+## FastAPI ML Endpoints (NEW)
+
+The backend now includes FastAPI endpoints for training and predicting monthly savings using linear regression models with PostgreSQL storage.
+
+### Starting the API Server
+
+```bash
+# Start the FastAPI server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The API will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
+
+### Database Schema
+
+The API expects the following PostgreSQL tables:
+
+**transactions table:**
+- `id`: INTEGER PRIMARY KEY
+- `user_id`: INTEGER (indexed)
+- `date`: DATE
+- `amount`: NUMERIC
+- `type`: VARCHAR (values: 'expense', 'income', 'savings')
+- `category`: VARCHAR (optional)
+- `description`: VARCHAR (optional)
+
+**model_parameters table:**
+- `id`: INTEGER PRIMARY KEY
+- `user_id`: INTEGER (indexed)
+- `model_type`: VARCHAR (e.g., 'linear_regression')
+- `target_table`: VARCHAR (e.g., 'transactions_savings')
+- `slope`: NUMERIC
+- `intercept`: NUMERIC
+- `parameters`: JSONB (stores r2_score, trained_months, start_month)
+- `last_trained_date`: DATE
+
+### Endpoint Usage
+
+#### 1. Train a Linear Regression Model
+
+**POST /ml/train**
+
+Train a linear regression model for monthly savings prediction from transaction history.
+
+**Request:**
+```json
+{
+  "user_id": 123,
+  "start_date": "2023-01-01",  // Optional, defaults to last 12 months
+  "end_date": "2023-12-31"      // Optional, defaults to today
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Model trained successfully with 12 months of data",
+  "model": {
+    "id": 1,
+    "user_id": 123,
+    "model_type": "linear_regression",
+    "target_table": "transactions_savings",
+    "slope": 150.25,
+    "intercept": 1000.0,
+    "parameters": {
+      "r2_score": 0.85,
+      "trained_months": 12,
+      "start_month": "2023-01"
+    },
+    "last_trained_date": "2024-01-15"
+  }
+}
+```
+
+**Behavior:**
+- Loads savings transactions (type='savings') for the user within the date range
+- Aggregates monthly totals and creates a time series
+- Trains a scikit-learn LinearRegression model
+- Computes R² score and stores model parameters
+- Upserts into model_parameters table (updates if exists, inserts otherwise)
+- Requires at least 3 months of data (returns 400 error otherwise)
+
+**Example with curl:**
+```bash
+curl -X POST "http://localhost:8000/ml/train" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": 123, "start_date": "2023-01-01", "end_date": "2023-12-31"}'
+```
+
+#### 2. Predict Monthly Savings
+
+**POST /ml/predict**
+
+Predict monthly savings for future months using a trained model.
+
+**Request:**
+```json
+{
+  "user_id": 123,
+  "months_ahead": 6
+}
+```
+
+**Response:**
+```json
+{
+  "user_id": 123,
+  "model_type": "linear_regression",
+  "predictions": [1801.0, 1951.25, 2101.5, 2251.75, 2402.0, 2552.25],
+  "model_parameters": {
+    "id": 1,
+    "user_id": 123,
+    "model_type": "linear_regression",
+    "target_table": "transactions_savings",
+    "slope": 150.25,
+    "intercept": 1000.0,
+    "parameters": {
+      "r2_score": 0.85,
+      "trained_months": 12,
+      "start_month": "2023-01"
+    },
+    "last_trained_date": "2024-01-15"
+  }
+}
+```
+
+**Behavior:**
+- Loads the latest trained model for the user
+- Returns 404 if no model is found
+- Generates predictions for the next N months using the linear model
+- Returns predictions as an array along with model metadata
+
+**Example with curl:**
+```bash
+curl -X POST "http://localhost:8000/ml/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": 123, "months_ahead": 6}'
+```
+
+### API Integration Notes
+
+- All endpoints use synchronous SQLAlchemy sessions
+- Training is performed in a database transaction
+- Model parameters are automatically upserted (no duplicates)
+- Clear error messages for missing data or models
+- Interactive API documentation available at `/docs`
 
 ## Quick Start
 
