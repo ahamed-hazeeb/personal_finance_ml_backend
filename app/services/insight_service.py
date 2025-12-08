@@ -273,8 +273,10 @@ class InsightService:
         # Find significant changes
         for category in second_totals:
             if category in first_totals and first_totals[category] > 0:
-                change_pct = ((second_totals[category] - first_totals[category]) 
-                             / first_totals[category]) * 100
+                change_pct = (
+                    (second_totals[category] - first_totals[category]) /
+                    first_totals[category]
+                ) * 100
                 
                 if abs(change_pct) > 20:  # Significant change threshold
                     trend = "increasing" if change_pct > 0 else "decreasing"

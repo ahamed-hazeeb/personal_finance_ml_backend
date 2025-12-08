@@ -3,7 +3,8 @@ FastAPI router for predictions endpoint.
 """
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from app.schemas.insights import PredictionsResponse, MonthlyPrediction
 from app.core.logging import get_logger
@@ -49,8 +50,18 @@ async def get_predictions(
         avg_expense = 243333
         base_confidence = 0.85
         
+        # Category percentages for breakdown
+        category_pcts = {
+            "Business": 0.68,
+            "Food": 0.11,
+            "Entertainment": 0.11,
+            "Shopping": 0.05,
+            "Others": 0.05
+        }
+        
         for i in range(months):
-            month_date = current_date + timedelta(days=30 * (i + 1))
+            # Use relativedelta for proper month arithmetic
+            month_date = current_date + relativedelta(months=i+1)
             month_str = month_date.strftime("%Y-%m")
             
             # Slightly vary predictions with some randomness
@@ -60,19 +71,19 @@ async def get_predictions(
             predicted_income = avg_income * variation
             predicted_expense = avg_expense * variation
             
+            # Calculate category breakdown based on predicted expense
+            category_breakdown = {
+                category: round(predicted_expense * pct, 2)
+                for category, pct in category_pcts.items()
+            }
+            
             predictions.append({
                 "month": month_str,
                 "predicted_income": round(predicted_income, 2),
                 "predicted_expense": round(predicted_expense, 2),
                 "predicted_savings": round(predicted_income - predicted_expense, 2),
                 "confidence": round(confidence, 2),
-                "category_breakdown": {
-                    "Business": round(avg_expense * 0.68, 2),
-                    "Food": round(avg_expense * 0.11, 2),
-                    "Entertainment": round(avg_expense * 0.11, 2),
-                    "Shopping": round(avg_expense * 0.05, 2),
-                    "Others": round(avg_expense * 0.05, 2)
-                }
+                "category_breakdown": category_breakdown
             })
         
         logger.info(f"Generated {len(predictions)} predictions for user {user_id}")
