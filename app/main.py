@@ -4,7 +4,7 @@ Main FastAPI application for Personal Finance ML Backend.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import ml, goals
+from app.routers import ml, goals, insights, predictions, goals_simplified
 from app.core.config import settings
 from app.core.logging import get_logger, setup_logging
 from app.core.monitoring import metrics_middleware, get_metrics
@@ -44,8 +44,11 @@ if settings.RATE_LIMIT_ENABLED:
     register_rate_limiter(app)
 
 # Include routers
-app.include_router(ml.router)
-app.include_router(goals.router)
+app.include_router(insights.router)  # POST /insights
+app.include_router(predictions.router)  # GET /predictions
+app.include_router(goals_simplified.router)  # POST /goals/timeline, POST /goals/reverse-plan
+app.include_router(ml.router)  # POST /ml/train, POST /ml/predict
+app.include_router(goals.router)  # POST /api/v1/goals/calculate-timeline, POST /api/v1/goals/reverse-plan
 
 logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 logger.info(f"Environment: {settings.ENVIRONMENT}")
@@ -60,10 +63,14 @@ def root():
         "version": settings.APP_VERSION,
         "environment": settings.ENVIRONMENT,
         "endpoints": {
+            "insights": "POST /insights - Get AI-powered spending insights from transactions",
+            "predictions": "GET /predictions?user_id=X&months=6 - Get future expense predictions",
+            "goals_timeline": "POST /goals/timeline - Calculate goal achievement timeline",
+            "goals_reverse_plan": "POST /goals/reverse-plan - Calculate required savings for goal",
             "ml_train": "POST /ml/train - Train a linear regression model for monthly savings",
             "ml_predict": "POST /ml/predict - Predict monthly savings for future months",
-            "goals_calculate_timeline": "POST /api/v1/goals/calculate-timeline - Calculate goal timeline",
-            "goals_reverse_plan": "POST /api/v1/goals/reverse-plan - Calculate required savings for goal",
+            "goals_calculate_timeline": "POST /api/v1/goals/calculate-timeline - Calculate goal timeline (detailed)",
+            "goals_reverse_plan_v1": "POST /api/v1/goals/reverse-plan - Calculate required savings (detailed)",
             "health": "GET /health - Health check endpoint",
             "metrics": "GET /metrics - Prometheus metrics (if enabled)",
             "docs": "GET /docs - Interactive API documentation"
