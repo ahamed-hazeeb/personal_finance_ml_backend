@@ -9,6 +9,7 @@ Implements personalized budgeting based on:
 """
 import pandas as pd
 import numpy as np
+import calendar
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -340,9 +341,9 @@ class BudgetOptimizer:
         wants_budget = budget.get('wants', 0)
         
         # Calculate days into month
-        days_in_month = (datetime.now().replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
-        days_in_month = days_in_month.day
-        current_day = datetime.now().day
+        now = datetime.now()
+        days_in_month = calendar.monthrange(now.year, now.month)[1]
+        current_day = now.day
         days_remaining = days_in_month - current_day
         
         # Projected spending

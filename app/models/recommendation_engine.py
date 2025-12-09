@@ -25,6 +25,14 @@ class RecommendationEngine:
     - Behavior nudges
     """
     
+    # Subscription detection intervals (in days)
+    MONTHLY_INTERVAL_MIN = 25
+    MONTHLY_INTERVAL_MAX = 35
+    WEEKLY_INTERVAL_MIN = 5
+    WEEKLY_INTERVAL_MAX = 9
+    QUARTERLY_INTERVAL_MIN = 85
+    QUARTERLY_INTERVAL_MAX = 95
+    
     def __init__(self):
         """Initialize the recommendation engine."""
         pass
@@ -178,17 +186,17 @@ class RecommendationEngine:
                         intervals = [(dates[i+1] - dates[i]).days for i in range(len(dates)-1)]
                         avg_interval = np.mean(intervals)
                         
-                        # Check if it's monthly (25-35 days) or weekly (5-9 days)
+                        # Check if it's monthly, weekly, or quarterly subscription
                         is_subscription = False
                         frequency = ''
                         
-                        if 25 <= avg_interval <= 35:
+                        if self.MONTHLY_INTERVAL_MIN <= avg_interval <= self.MONTHLY_INTERVAL_MAX:
                             is_subscription = True
                             frequency = 'monthly'
-                        elif 5 <= avg_interval <= 9:
+                        elif self.WEEKLY_INTERVAL_MIN <= avg_interval <= self.WEEKLY_INTERVAL_MAX:
                             is_subscription = True
                             frequency = 'weekly'
-                        elif 85 <= avg_interval <= 95:
+                        elif self.QUARTERLY_INTERVAL_MIN <= avg_interval <= self.QUARTERLY_INTERVAL_MAX:
                             is_subscription = True
                             frequency = 'quarterly'
                         

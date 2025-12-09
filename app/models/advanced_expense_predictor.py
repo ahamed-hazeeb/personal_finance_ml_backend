@@ -147,7 +147,7 @@ class AdvancedExpenseForecaster:
                             if temp_fitted.aic < best_aic:
                                 best_aic = temp_fitted.aic
                                 best_order = (p, d, q)
-                        except:
+                        except Exception:
                             continue
             
             # Fit best ARIMA model
