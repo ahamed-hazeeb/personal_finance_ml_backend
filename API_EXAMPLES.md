@@ -500,6 +500,478 @@ Default limits (configurable):
 
 ---
 
+## Phase 2 Features: Advanced AI & Analytics
+
+### 1. Advanced Expense Forecasting
+
+Get time-series forecasts using Holt-Winters or ARIMA models.
+
+**Endpoint:** `POST /api/v1/predictions/expense/advanced`
+
+**Request:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/predictions/expense/advanced" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 1,
+    "transactions": [
+      {"date": "2024-01-15", "amount": 5000, "type": "expense", "category": "General"},
+      {"date": "2024-02-15", "amount": 5200, "type": "expense", "category": "General"}
+    ],
+    "forecast_months": 3
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "model_type": "arima",
+  "forecast": [5150.25, 5180.50, 5210.75],
+  "confidence_interval_lower": [4800.00, 4850.00, 4900.00],
+  "confidence_interval_upper": [5500.00, 5510.00, 5520.00],
+  "confidence_level": 0.95,
+  "months_of_data": 8,
+  "last_month_expense": 5200.0,
+  "average_monthly_expense": 5100.0,
+  "trained_at": "2024-12-09T10:30:00"
+}
+```
+
+### 2. Financial Health Score
+
+Calculate comprehensive financial health score (0-100).
+
+**Endpoint:** `POST /api/v1/insights/health-score`
+
+**Request:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/insights/health-score" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 1,
+    "transactions": [...],
+    "emergency_savings": 15000,
+    "monthly_debt_payment": 500,
+    "goals": [
+      {
+        "status": "active",
+        "current_amount": 25000,
+        "target_amount": 50000
+      }
+    ]
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "overall_score": 72.5,
+  "grade": "C",
+  "component_scores": {
+    "savings_rate": {
+      "score": 70,
+      "weight": 0.30,
+      "details": {
+        "savings_rate": 20.0,
+        "status": "good"
+      }
+    },
+    "expense_consistency": {
+      "score": 85,
+      "weight": 0.25,
+      "details": {
+        "coefficient_of_variation": 12.5,
+        "status": "good"
+      }
+    },
+    "emergency_fund": {
+      "score": 70,
+      "weight": 0.20,
+      "details": {
+        "months_covered": 3.0,
+        "status": "good"
+      }
+    },
+    "debt_to_income": {
+      "score": 90,
+      "weight": 0.15,
+      "details": {
+        "debt_to_income_ratio": 10.0,
+        "status": "excellent"
+      }
+    },
+    "goal_progress": {
+      "score": 60,
+      "weight": 0.10,
+      "details": {
+        "average_progress": 50.0,
+        "status": "good"
+      }
+    }
+  },
+  "recommendations": [
+    {
+      "category": "emergency_fund",
+      "priority": "high",
+      "message": "Build your emergency fund to cover 3.0 more months of expenses."
+    }
+  ],
+  "calculated_at": "2024-12-09T10:30:00"
+}
+```
+
+### 3. Health Score Trends
+
+Get historical health score trends and changes.
+
+**Endpoint:** `GET /api/v1/insights/trends/{user_id}?months=6`
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "current_score": 72.5,
+  "trend_data": [
+    {"score": 65.0, "grade": "D", "calculated_at": "2024-06-09T10:00:00"},
+    {"score": 68.5, "grade": "D", "calculated_at": "2024-07-09T10:00:00"},
+    {"score": 70.0, "grade": "C", "calculated_at": "2024-08-09T10:00:00"},
+    {"score": 72.5, "grade": "C", "calculated_at": "2024-09-09T10:00:00"}
+  ],
+  "month_over_month_change": 3.57,
+  "quarter_over_quarter_change": 11.54
+}
+```
+
+### 4. Peer Benchmark Comparison
+
+Compare health score against peer benchmarks.
+
+**Endpoint:** `GET /api/v1/insights/benchmark/{user_id}?age_group=25-30&income_bracket=50-75k`
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "age_group": "25-30",
+  "income_bracket": "50-75k",
+  "benchmark": {
+    "user_score": 72.5,
+    "peer_average": 68.0,
+    "percentile": 65.5,
+    "comparison": "Your score is 4.5 points above your peer group average"
+  }
+}
+```
+
+### 5. Budget Recommendations
+
+Generate personalized budget using 50/30/20 rule.
+
+**Endpoint:** `POST /api/v1/budget/recommend`
+
+**Request:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/budget/recommend" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 1,
+    "transactions": [...],
+    "goals": [],
+    "analysis_months": 3
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "monthly_income": 50000,
+  "recommended_budget": {
+    "needs": 25000,
+    "wants": 15000,
+    "savings": 10000,
+    "needs_percentage": 50.0,
+    "wants_percentage": 30.0,
+    "savings_percentage": 20.0
+  },
+  "current_spending": {
+    "needs": 28000,
+    "wants": 18000,
+    "savings": 4000,
+    "needs_percentage": 56.0,
+    "wants_percentage": 36.0,
+    "savings_percentage": 8.0
+  },
+  "adjustments_needed": {
+    "needs": -3000,
+    "wants": -3000,
+    "savings": 6000
+  },
+  "category_recommendations": [
+    {
+      "category": "Entertainment",
+      "type": "reduction",
+      "message": "Consider reducing Entertainment spending by 20%.",
+      "current_amount": 5000,
+      "recommended_amount": 4000,
+      "potential_savings": 1000
+    }
+  ],
+  "calculated_at": "2024-12-09T10:30:00"
+}
+```
+
+### 6. Budget Overspending Alerts
+
+Get real-time overspending alerts.
+
+**Endpoint:** `POST /api/v1/budget/alerts`
+
+**Request:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/budget/alerts" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 1,
+    "transactions": [...],
+    "budget": {
+      "needs": 25000,
+      "wants": 15000,
+      "savings": 10000
+    }
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "alerts": [
+    {
+      "type": "projected_overspending",
+      "category": "wants",
+      "severity": "warning",
+      "message": "At current rate, you'll exceed Wants budget by 15% (2250 Rs.)",
+      "current_spending": 12000,
+      "projected_spending": 17250,
+      "budget": 15000,
+      "days_remaining": 15
+    }
+  ],
+  "alert_count": 1
+}
+```
+
+### 7. Budget Optimization
+
+Get optimization suggestions to reach target savings rate.
+
+**Endpoint:** `POST /api/v1/budget/optimize`
+
+**Request:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/budget/optimize" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 1,
+    "transactions": [...],
+    "target_savings_rate": 0.25
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "current_savings_rate": 15.0,
+  "target_savings_rate": 25.0,
+  "monthly_savings_gap": 5000,
+  "optimization_opportunities": [
+    {
+      "category": "Food Delivery",
+      "current_spending": 6000,
+      "suggested_reduction": 1800,
+      "new_budget": 4200
+    },
+    {
+      "category": "Entertainment",
+      "current_spending": 5000,
+      "suggested_reduction": 1500,
+      "new_budget": 3500
+    }
+  ],
+  "projected_savings_rate": 24.5
+}
+```
+
+### 8. Spending Habits Analysis
+
+Analyze spending habits and patterns.
+
+**Endpoint:** `POST /api/v1/recommendations/habits`
+
+**Request:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/recommendations/habits" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": 1,
+    "transactions": [...],
+    "analysis_months": 3
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "habits": [
+    {
+      "type": "food_delivery",
+      "category": "Food Delivery",
+      "message": "You order food 3.2 times per week, costing Rs. 18,000 over 3 months. Cooking at home could save 50-70%.",
+      "frequency_per_week": 3.2,
+      "total_amount": 18000,
+      "potential_savings": 10800
+    },
+    {
+      "type": "high_frequency",
+      "category": "Coffee Shops",
+      "message": "You spend on Coffee Shops 4.5 times per week, totaling Rs. 5,400 over 3 months.",
+      "frequency_per_week": 4.5,
+      "total_amount": 5400,
+      "average_transaction": 100
+    }
+  ],
+  "habits_count": 2,
+  "analysis_period_months": 3
+}
+```
+
+### 9. Subscription Detection
+
+Detect recurring subscription charges.
+
+**Endpoint:** `POST /api/v1/recommendations/subscriptions`
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "subscriptions": [
+    {
+      "type": "subscription",
+      "description": "Netflix Premium",
+      "amount": 649,
+      "frequency": "monthly",
+      "occurrences": 6,
+      "average_interval_days": 30.5,
+      "estimated_annual_cost": 7788,
+      "message": "Recurring monthly charge: Netflix Premium - Rs. 649",
+      "first_seen": "2024-06-15",
+      "last_seen": "2024-12-15"
+    },
+    {
+      "type": "subscription",
+      "description": "Spotify Family",
+      "amount": 179,
+      "frequency": "monthly",
+      "occurrences": 6,
+      "average_interval_days": 29.8,
+      "estimated_annual_cost": 2148,
+      "message": "Recurring monthly charge: Spotify Family - Rs. 179"
+    }
+  ],
+  "subscription_count": 2,
+  "total_monthly_cost": 828,
+  "total_annual_cost": 9936
+}
+```
+
+### 10. Savings Opportunities
+
+Identify savings opportunities based on spending patterns.
+
+**Endpoint:** `POST /api/v1/recommendations/opportunities`
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "opportunities": [
+    {
+      "type": "hidden_fees",
+      "category": "Small Charges",
+      "message": "Multiple small charges totaling Rs. 1,250. Review for unnecessary fees.",
+      "total_amount": 1250,
+      "transaction_count": 18,
+      "potential_savings": 625
+    },
+    {
+      "type": "weekend_spending",
+      "message": "Weekend spending is 1.8x higher than weekdays. Plan weekend activities to reduce costs.",
+      "weekend_average": 2500,
+      "weekday_average": 1400,
+      "potential_savings": 2200
+    }
+  ],
+  "opportunity_count": 2,
+  "total_potential_savings": 2825
+}
+```
+
+### 11. Behavior Nudges
+
+Get behavior nudges for positive reinforcement and warnings.
+
+**Endpoint:** `POST /api/v1/recommendations/nudges`
+
+**Response:**
+```json
+{
+  "success": true,
+  "user_id": 1,
+  "nudges": [
+    {
+      "type": "positive_reinforcement",
+      "category": "spending_reduction",
+      "message": "Great job! You've reduced spending by 15% this month.",
+      "sentiment": "positive",
+      "change_percentage": -15.0
+    },
+    {
+      "type": "milestone",
+      "category": "goal_progress",
+      "message": "Halfway there! You've reached 50% of your 'Emergency Fund' target.",
+      "sentiment": "positive",
+      "progress_percentage": 50.0
+    },
+    {
+      "type": "positive_reinforcement",
+      "category": "no_spend_days",
+      "message": "You had 8 no-spend days this month. Excellent discipline!",
+      "sentiment": "positive",
+      "no_spend_days": 8
+    }
+  ],
+  "nudge_count": 3
+}
+```
+
+---
+
 ## Support
 
 - **Interactive Documentation**: http://localhost:8000/docs

@@ -28,6 +28,7 @@ celery>=5.3.0
 
 # Time Series (FIXED VERSION)
 statsmodels>=0.14.1  # Changed from ==0.14.0
+pmdarima>=2.0.4  # Auto-ARIMA for advanced forecasting
 
 # Monitoring
 prometheus-client>=0.19.0
