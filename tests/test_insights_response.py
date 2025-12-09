@@ -10,6 +10,12 @@ from app.services.insight_service import get_insight_service
 from app.schemas.transactions import TransactionSchema
 
 
+# Constants for validation
+VALID_SEVERITIES = ["info", "warning", "alert"]
+VALID_INSIGHT_TYPES = ["high_spending", "savings_opportunity", "anomaly", "trend"]
+REQUIRED_INSIGHT_FIELDS = ["type", "message", "severity"]
+
+
 def generate_synthetic_transactions_with_trends():
     """
     Generate synthetic transactions that will produce trend insights.
@@ -95,22 +101,19 @@ def test_all_insights_have_required_fields():
     assert len(insights) > 0, "Should generate at least one insight"
     
     # Check each insight for required fields
-    required_fields = ["type", "message", "severity"]
     for i, insight in enumerate(insights):
-        for field in required_fields:
+        for field in REQUIRED_INSIGHT_FIELDS:
             assert field in insight, f"Insight {i} missing required field '{field}': {insight}"
             assert insight[field] is not None, f"Insight {i} field '{field}' is None: {insight}"
             assert insight[field] != "", f"Insight {i} field '{field}' is empty: {insight}"
         
         # Validate severity is one of the expected values
-        valid_severities = ["info", "warning", "alert"]
-        assert insight["severity"] in valid_severities, \
-            f"Insight {i} has invalid severity '{insight['severity']}', expected one of {valid_severities}"
+        assert insight["severity"] in VALID_SEVERITIES, \
+            f"Insight {i} has invalid severity '{insight['severity']}', expected one of {VALID_SEVERITIES}"
         
         # Validate type is one of the expected values
-        valid_types = ["high_spending", "savings_opportunity", "anomaly", "trend"]
-        assert insight["type"] in valid_types, \
-            f"Insight {i} has invalid type '{insight['type']}', expected one of {valid_types}"
+        assert insight["type"] in VALID_INSIGHT_TYPES, \
+            f"Insight {i} has invalid type '{insight['type']}', expected one of {VALID_INSIGHT_TYPES}"
 
 
 def test_trend_insights_have_severity():
@@ -204,7 +207,7 @@ def test_other_insight_types_have_severity():
     # Check all insights have severity
     for insight in result["insights"]:
         assert "severity" in insight, f"Insight missing severity: {insight}"
-        assert insight["severity"] in ["info", "warning", "alert"], \
+        assert insight["severity"] in VALID_SEVERITIES, \
             f"Invalid severity value: {insight['severity']}"
         
         # Verify expected severity based on type
