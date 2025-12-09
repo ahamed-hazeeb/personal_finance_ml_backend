@@ -13,6 +13,40 @@ A comprehensive machine learning backend for personal finance management with ad
 
 ## 🌟 Key Features
 
+### 🎯 Phase 2-4: Advanced AI Features (NEW!)
+
+#### 💡 Advanced Expense Forecasting
+- **Holt-Winters Model**: Seasonal pattern detection for 12+ months of data
+- **ARIMA Model**: Trend-based forecasting for 6-11 months of data  
+- **Auto Model Selection**: Automatically chooses the best model based on data availability
+- **Confidence Intervals**: 95% prediction intervals for uncertainty quantification
+
+#### 🏥 Financial Health Scoring (0-100)
+- **Comprehensive Scoring**: 5-component algorithm with weighted scores
+  - Savings Rate (30%): Track your savings habits
+  - Expense Consistency (25%): Measure spending predictability
+  - Emergency Fund (20%): Assess financial safety net
+  - Debt-to-Income Ratio (15%): Monitor debt burden
+  - Goal Progress (10%): Track financial goal achievement
+- **Historical Tracking**: Month-over-month and quarter-over-quarter trends
+- **Peer Benchmarking**: Anonymous comparison with similar age/income groups
+- **Actionable Recommendations**: Personalized advice for improvement
+
+#### 💰 Smart Budget Optimizer
+- **50/30/20 Rule**: Automated budget allocation (Needs/Wants/Savings)
+- **Goal-Adjusted Budgets**: Personalized based on active financial goals
+- **Real-time Alerts**: Predictive overspending warnings
+- **Category Recommendations**: Specific suggestions for each spending category
+- **Leakage Detection**: Identify high-variance spending categories
+- **Optimization Suggestions**: Reach target savings rates with actionable steps
+
+#### 🤖 Personalized Recommendation Engine
+- **Spending Habits Analysis**: Frequency analysis and pattern detection
+- **Subscription Detection**: Automatically identify recurring charges (monthly, weekly, quarterly)
+- **Savings Opportunities**: Find hidden fees, impulse purchases, and spending patterns
+- **Behavior Nudges**: Positive reinforcement, warnings, and milestone celebrations
+- **Smart Insights**: Weekend vs weekday spending, no-spend days, and more
+
 ### 💰 Goal Planning Intelligence
 - **Timeline Calculator**: Calculate how long it takes to reach financial goals
 - **Reverse Planning**: Determine required monthly savings for target dates
@@ -188,6 +222,39 @@ curl -X POST "http://localhost:8000/ml/predict" \
     "months_ahead": 6
   }'
 ```
+
+### Phase 2 Features: Advanced AI & Analytics
+
+#### Advanced Expense Forecasting
+```bash
+POST /api/v1/predictions/expense/advanced
+```
+Time-series forecasting using Holt-Winters (12+ months) or ARIMA (6-11 months).
+
+#### Financial Health Score
+```bash
+POST /api/v1/insights/health-score
+GET  /api/v1/insights/trends/{user_id}
+GET  /api/v1/insights/benchmark/{user_id}
+```
+Comprehensive health scoring (0-100) with trends and peer benchmarking.
+
+#### Smart Budget Management
+```bash
+POST /api/v1/budget/recommend
+POST /api/v1/budget/alerts
+POST /api/v1/budget/optimize
+```
+Personalized budgets using 50/30/20 rule with real-time alerts and optimization.
+
+#### Personalized Recommendations
+```bash
+POST /api/v1/recommendations/habits
+POST /api/v1/recommendations/subscriptions
+POST /api/v1/recommendations/opportunities
+POST /api/v1/recommendations/nudges
+```
+Habit analysis, subscription detection, savings opportunities, and behavior nudges.
 
 ### System Endpoints
 
