@@ -283,6 +283,7 @@ class InsightService:
                     insights.append({
                         "type": "trend",
                         "message": f"Your {category} expenses {trend} by {abs(change_pct):.0f}% compared to earlier period",
+                        "severity": "info",
                         "category": category,
                         "trend": trend,
                         "change_percentage": round(change_pct, 2)

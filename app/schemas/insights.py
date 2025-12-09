@@ -9,7 +9,7 @@ class InsightSchema(BaseModel):
     """Schema for individual insight."""
     type: str = Field(..., description="Insight type: high_spending, savings_opportunity, anomaly, trend")
     message: str = Field(..., description="Human-readable insight message")
-    severity: str = Field(..., description="Severity level: info, warning, alert")
+    severity: Optional[str] = Field('info', description="Severity level: info, warning, alert")
     category: Optional[str] = Field(None, description="Related category")
     amount: Optional[float] = Field(None, description="Related amount")
     percentage: Optional[float] = Field(None, description="Percentage value")

@@ -48,6 +48,20 @@ async def get_insights(request: TransactionListRequest):
         # Generate insights
         result = insight_service.generate_insights(request.transactions)
         
+        # Defensive normalization: ensure all insights have a severity field
+        normalized_count = 0
+        for insight in result['insights']:
+            if not insight.get('severity') or insight.get('severity') == '':
+                insight['severity'] = 'info'
+                normalized_count += 1
+                logger.debug(
+                    f"Normalized insight missing severity: type={insight.get('type')}, "
+                    f"message={insight.get('message', '')[:50]}"
+                )
+        
+        if normalized_count > 0:
+            logger.debug(f"Normalized {normalized_count} insights with missing severity field")
+        
         logger.info(
             f"Generated {len(result['insights'])} insights for user {request.user_id}"
         )
