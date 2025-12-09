@@ -4,7 +4,7 @@ Main FastAPI application for Personal Finance ML Backend.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import ml, goals, insights, predictions, goals_simplified, health_score, advanced_predictions, budget, recommendations
+from app.routers import ml, goals, insights, predictions, goals_simplified, health_score, advanced_predictions, budget, recommendations, db_admin
 from app.core.config import settings
 from app.core.logging import get_logger, setup_logging
 from app.core.monitoring import metrics_middleware, get_metrics
@@ -53,6 +53,7 @@ app.include_router(health_score.router)  # POST /api/v1/insights/health-score, G
 app.include_router(advanced_predictions.router)  # POST /api/v1/predictions/expense/advanced
 app.include_router(budget.router)  # POST /api/v1/budget/recommend, POST /api/v1/budget/alerts, POST /api/v1/budget/optimize
 app.include_router(recommendations.router)  # POST /api/v1/recommendations/habits, POST /api/v1/recommendations/opportunities, etc.
+app.include_router(db_admin.router)  # GET /api/v1/admin/db/status, POST /api/v1/admin/db/init
 
 logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 logger.info(f"Environment: {settings.ENVIRONMENT}")
@@ -75,6 +76,8 @@ def root():
             "ml_predict": "POST /ml/predict - Predict monthly savings for future months",
             "goals_calculate_timeline": "POST /api/v1/goals/calculate-timeline - Calculate goal timeline (detailed)",
             "goals_reverse_plan_v1": "POST /api/v1/goals/reverse-plan - Calculate required savings (detailed)",
+            "db_status": "GET /api/v1/admin/db/status - Check database status and missing tables",
+            "db_init": "POST /api/v1/admin/db/init - Initialize database (create missing tables)",
             "health": "GET /health - Health check endpoint",
             "metrics": "GET /metrics - Prometheus metrics (if enabled)",
             "docs": "GET /docs - Interactive API documentation"
