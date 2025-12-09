@@ -148,6 +148,27 @@ class FinancialGoals(Base):
     )
 
 
+class FinancialHealthHistory(Base):
+    """Financial health score history tracking."""
+    __tablename__ = "financial_health_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    score = Column(Integer, nullable=False)  # Overall score 0-100
+    savings_rate_score = Column(Numeric, nullable=True)
+    expense_consistency_score = Column(Numeric, nullable=True)
+    emergency_fund_score = Column(Numeric, nullable=True)
+    debt_ratio_score = Column(Numeric, nullable=True)
+    goal_progress_score = Column(Numeric, nullable=True)
+    grade = Column(String(2), nullable=True)  # A, B, C, D, F
+    recommendations = Column(JSON, nullable=True)
+    calculated_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    
+    __table_args__ = (
+        Index('idx_user_calculated', 'user_id', 'calculated_at'),
+    )
+
+
 # Dependency to get DB session
 def get_db():
     """FastAPI dependency that provides a database session."""

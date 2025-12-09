@@ -4,7 +4,7 @@ Main FastAPI application for Personal Finance ML Backend.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import ml, goals, insights, predictions, goals_simplified
+from app.routers import ml, goals, insights, predictions, goals_simplified, health_score, advanced_predictions
 from app.core.config import settings
 from app.core.logging import get_logger, setup_logging
 from app.core.monitoring import metrics_middleware, get_metrics
@@ -49,6 +49,8 @@ app.include_router(predictions.router)  # GET /predictions
 app.include_router(goals_simplified.router)  # POST /goals/timeline, POST /goals/reverse-plan
 app.include_router(ml.router)  # POST /ml/train, POST /ml/predict
 app.include_router(goals.router)  # POST /api/v1/goals/calculate-timeline, POST /api/v1/goals/reverse-plan
+app.include_router(health_score.router)  # POST /api/v1/insights/health-score, GET /api/v1/insights/trends, GET /api/v1/insights/benchmark
+app.include_router(advanced_predictions.router)  # POST /api/v1/predictions/expense/advanced
 
 logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 logger.info(f"Environment: {settings.ENVIRONMENT}")
