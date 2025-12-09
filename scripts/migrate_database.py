@@ -36,16 +36,29 @@ def run_migration():
         print(f"  ✓ {table}")
     print()
     
-    # New tables to create
-    new_tables = [
-        'financial_health_history',
-        'user_benchmarks',
+    # All tables in the comprehensive schema
+    all_tables = [
+        'users',
+        'accounts',
+        'categories',
+        'payment_methods',
+        'bills',
+        'transactions',
+        'budgets',
+        'future_plans',
+        'reminders',
+        'model_parameters',
+        'prediction_cache',
         'model_performance_metrics',
+        'user_benchmarks',
         'recommendations_history',
-        'financial_goals'
+        'financial_goals',
+        'financial_health_history'
     ]
     
-    print("🔨 Creating new tables...")
+    print("🔨 Creating/updating database tables...")
+    print(f"   Schema includes {len(all_tables)} tables")
+    print()
     
     # Create all tables (will skip existing ones)
     try:
@@ -84,14 +97,22 @@ def verify_migration():
     print()
     
     required_tables = [
+        'users',
+        'accounts',
+        'categories',
+        'payment_methods',
+        'bills',
         'transactions',
+        'budgets',
+        'future_plans',
+        'reminders',
         'model_parameters',
         'prediction_cache',
-        'financial_health_history',
-        'user_benchmarks',
         'model_performance_metrics',
+        'user_benchmarks',
         'recommendations_history',
-        'financial_goals'
+        'financial_goals',
+        'financial_health_history'
     ]
     
     inspector = inspect(engine)
